@@ -95,11 +95,12 @@ const formatJSONAddress = (jsonAddress) => {
 
 // Formats data from window._shared_data.entry_data.ProfilePage[0].graphql.user to nicer output
 const formatProfileOutput = async (input, request, data, page, itemSpec) => {
-    const following = await getProfileFollowing(page, itemSpec, input);
-    const followedBy = await getProfileFollowedBy(page, itemSpec, input);
+    // const following = await getProfileFollowing(page, itemSpec, input);
+    // const followedBy = await getProfileFollowedBy(page, itemSpec, input);
     return {
         '#debug': Apify.utils.createRequestDebugInfo(request),
         id: data.id,
+        dtId: request.userData.id,
         username: data.username,
         fullName: data.full_name,
         biography: data.biography,
@@ -120,9 +121,9 @@ const formatProfileOutput = async (input, request, data, page, itemSpec) => {
         igtvVideoCount: data.edge_felix_video_timeline.count,
         latestIgtvVideos: data.edge_felix_video_timeline ? data.edge_felix_video_timeline.edges.map(formatIGTVVideo) : [],
         postsCount: data.edge_owner_to_timeline_media.count,
-        latestPosts: data.edge_owner_to_timeline_media ? data.edge_owner_to_timeline_media.edges.map((edge) => edge.node).map(formatSinglePost) : [],
-        following,
-        followedBy,
+        // latestPosts: data.edge_owner_to_timeline_media ? data.edge_owner_to_timeline_media.edges.map((edge) => edge.node).map(formatSinglePost) : [],
+        // following,
+        // followedBy,
     };
 };
 
