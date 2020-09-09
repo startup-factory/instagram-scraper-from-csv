@@ -85,7 +85,7 @@ async function main() {
                   const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
                   let lines = body.split('\n');
                   delete  lines[0]
-                  let extractedSources = lines.map(line => {
+                  requestListSources = lines.map(line => {
                       let [id, url] = line.trim().split('\t');
                       if (!/http(s?):\/\//g.test(url)) {
                           url = `http://${url}`
@@ -93,7 +93,6 @@ async function main() {
                       Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
                       return {url, userData: {id, pageType: getPageTypeFromUrl(url)}};
                   }).filter(req => !!req);
-                  requestListSources.push(...extractedSources)
               }
             }
         }
