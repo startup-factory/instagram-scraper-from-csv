@@ -85,8 +85,14 @@ async function main() {
                   const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
                   let lines = body.split('\n');
                   delete  lines[0]
+                  lines.map(line => {
+                    let [id, url] = line.trim().split('\t');
+                    if (!url) {return false }
+                    return {url}
+                  }).filter(req => !!req);
                   requestListSources = lines.map(line => {
                       let [id, url] = line.trim().split('\t');
+                      if (!url) { return false }
                       if (!/http(s?):\/\//g.test(url)) {
                           url = `http://${url}`
                       }
@@ -208,6 +214,12 @@ async function main() {
     const handlePageFunction = async ({ page, puppeteerPool, request, response }) => {
         if (response.status() === 404) {
             Apify.utils.log.error(`Page "${request.url}" does not exist.`);
+            const output = {
+              inputId: request.userData.id,
+              inputUrl: request.url,
+              error: '404 page does not exist'
+            }
+            await Apify.pushData(output);
             return;
         }
         const error = await page.$('body.p-error');
