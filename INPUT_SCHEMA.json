@@ -29,6 +29,13 @@
             "minimum": 1,
             "maximum": 100
         },
+        "startUrls": {
+            "title": "csv list of url",
+            "type": "array",
+            "description": "csv list of instagram accounts where the actor will start crawling.",
+            "prefill": [{ "url": "https://apify.com" }],
+            "editor": "requestListSources"
+        },
         "directUrls": {
             "title": "Direct Instagram page URLs",
             "type": "array",

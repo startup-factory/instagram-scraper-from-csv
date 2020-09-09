@@ -14,6 +14,7 @@ const errors = require('./errors');
 async function main() {
     const input = await Apify.getInput();
     const {
+        startUrls,
         proxy,
         resultsType,
         resultsLimit = 200,
@@ -72,6 +73,26 @@ async function main() {
     if (Array.isArray(directUrls) && directUrls.length > 0) {
         Apify.utils.log.warning('Search is disabled when Direct URLs are used');
         urls = directUrls
+    } else if (Array.isArray(startUrls) && startUrls.length > 0) {
+        let sources = [];
+        for (const startUrl of startUrls) {
+            const {requestsFromUrl} = startUrl;
+            if (requestsFromUrl){
+                const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
+                let lines = body.split('\n');
+                delete  lines[0]
+                let extractedSources = lines.map(line => {
+                    let [id, url] = line.trim().split('\t');
+                    if (!/http(s?):\/\//g.test(url)) {
+                        url = `http://${url}`
+                    }
+                    // return {url, userData: {id}};
+                    return url
+                }).filter(req => !!req);
+                sources.push(...extractedSources)
+            }
+        }
+        urls = sources
     } else {
         urls = await searchUrls(input, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
     }
