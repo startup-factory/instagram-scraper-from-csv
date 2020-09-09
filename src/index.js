@@ -70,46 +70,47 @@ async function main() {
     }
 
     let urls;
+    let requestListSources;
     if (Array.isArray(directUrls) && directUrls.length > 0) {
         Apify.utils.log.warning('Search and StartUrls are disabled when Direct URLs are used');
         urls = directUrls
     } else if (Array.isArray(startUrls) && startUrls.length > 0) {
       Apify.utils.log.warning('Search and directUrls are disabled when startUrls tsv file is used');
-        let sources = [];
         for (const startUrl of startUrls) {
-            const {requestsFromUrl} = startUrl;
-            if (requestsFromUrl){
-                const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
-                let lines = body.split('\n');
-                delete  lines[0]
-                let extractedSources = lines.map(line => {
-                    let [id, url] = line.trim().split('\t');
-                    if (!/http(s?):\/\//g.test(url)) {
-                        url = `http://${url}`
-                    }
-                    // return {url, userData: {id}};
-                    Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
-
-                    return url
-                }).filter(req => !!req);
-                sources.push(...extractedSources)
+            Apify.utils.log.info(`startUrl: ${startUrl}`);
+            if (startUrl){
+              const {requestsFromUrl} = startUrl;
+              Apify.utils.log.info(`requestsFromUrl: ${requestsFromUrl}`);
+              if (requestsFromUrl){
+                  const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
+                  let lines = body.split('\n');
+                  delete  lines[0]
+                  let extractedSources = lines.map(line => {
+                      let [id, url] = line.trim().split('\t');
+                      if (!/http(s?):\/\//g.test(url)) {
+                          url = `http://${url}`
+                      }
+                      Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
+                      return {url, userData: {id, pageType: getPageTypeFromUrl(url)}};
+                  }).filter(req => !!req[url]);
+                  requestListSources.push(...extractedSources)
+              }
             }
         }
-        urls = sources
     } else {
         Apify.utils.log.info('using search input');
         urls = await searchUrls(input, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
     }
-    Apify.utils.log.info(`urls:`);
-    console.dir(urls);
 
-    const requestListSources = urls.map((url) => ({
-        url,
-        userData: {
-            // TODO: This should be the only page type we ever need, remove the one from entryData
-            pageType: getPageTypeFromUrl(url),
-        },
-    }));
+    if (!requestListSources) {
+      requestListSources = urls.map((url) => ({
+          url,
+          userData: {
+              // TODO: This should be the only page type we ever need, remove the one from entryData
+              pageType: getPageTypeFromUrl(url),
+          },
+      }));
+    }
 
     Apify.utils.log.info(`Parsed start URLs:`);
     console.dir(requestListSources);
