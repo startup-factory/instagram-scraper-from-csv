@@ -92,7 +92,7 @@ async function main() {
                       }
                       Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
                       return {url, userData: {id, pageType: getPageTypeFromUrl(url)}};
-                  }).filter(req => !!req[url]);
+                  }).filter(req => !!req);
                   requestListSources.push(...extractedSources)
               }
             }
