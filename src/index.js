@@ -71,9 +71,10 @@ async function main() {
 
     let urls;
     if (Array.isArray(directUrls) && directUrls.length > 0) {
-        Apify.utils.log.warning('Search is disabled when Direct URLs are used');
+        Apify.utils.log.warning('Search and StartUrls are disabled when Direct URLs are used');
         urls = directUrls
     } else if (Array.isArray(startUrls) && startUrls.length > 0) {
+      Apify.utils.log.warning('Search and directUrls are disabled when startUrls tsv file is used');
         let sources = [];
         for (const startUrl of startUrls) {
             const {requestsFromUrl} = startUrl;
@@ -87,6 +88,8 @@ async function main() {
                         url = `http://${url}`
                     }
                     // return {url, userData: {id}};
+                    Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
+
                     return url
                 }).filter(req => !!req);
                 sources.push(...extractedSources)
@@ -94,8 +97,11 @@ async function main() {
         }
         urls = sources
     } else {
+        Apify.utils.log.info('using search input');
         urls = await searchUrls(input, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
     }
+    Apify.utils.log.info(`urls:`);
+    console.dir(urls);
 
     const requestListSources = urls.map((url) => ({
         url,
