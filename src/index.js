@@ -72,6 +72,7 @@ async function main() {
 
     let urls;
     let requestListSources;
+    let proxyUrl;
     if (Array.isArray(directUrls) && directUrls.length > 0) {
         Apify.utils.log.warning('Search and StartUrls are disabled when Direct URLs are used');
         urls = directUrls
@@ -113,25 +114,29 @@ async function main() {
                       let [id, name] = line.trim().split('\t');
                       if (!name) { return false }
                       Apify.utils.log.info(`csv extraction: id: ${id} name ${name}`);
-                      localInput = {
+                      let localInput = {
                         ...input,
                         search: name
-                      }
-                      urls = await searchUrls(localInput, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
-                      requestListSources = urls.map((url) => ({
-                          url,
-                          userData: {
-                              id,
-                              pageType: getPageTypeFromUrl(url),
-                          },
-                      }));
+                      };
+                      proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
+                      urls = searchUrls(localInput, proxyUrl);
+                      urls.map((url) => (
+                          requestListSources.push({
+                              url,
+                              userData: {
+                                  id,
+                                  pageType: getPageTypeFromUrl(url),
+                              },
+                          })
+                      ));
                   }).filter(req => !!req);
               }
             }
         }
     } else {
+        proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined
         Apify.utils.log.info('using search input');
-        urls = await searchUrls(input, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
+        urls = await searchUrls(input, proxyUrl);
     }
 
     if (!requestListSources) {
