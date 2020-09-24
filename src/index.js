@@ -15,6 +15,7 @@ async function main() {
     const input = await Apify.getInput();
     const {
         startUrls,
+        startNames,
         proxy,
         resultsType,
         resultsLimit = 200,
@@ -85,11 +86,6 @@ async function main() {
                   const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
                   let lines = body.split('\n');
                   delete  lines[0]
-                  lines.map(line => {
-                    let [id, url] = line.trim().split('\t');
-                    if (!url) {return false }
-                    return {url}
-                  }).filter(req => !!req);
                   requestListSources = lines.map(line => {
                       let [id, url] = line.trim().split('\t');
                       if (!url) { return false }
@@ -98,6 +94,37 @@ async function main() {
                       }
                       Apify.utils.log.info(`csv extraction: id: ${id} url ${url}`);
                       return {url, userData: {id, pageType: getPageTypeFromUrl(url)}};
+                  }).filter(req => !!req);
+              }
+            }
+        }
+    } else if (Array.isArray(startNames) && startNames.length > 0) {
+      Apify.utils.log.warning('Search and directUrls are disabled when startNames tsv file is used');
+        for (const startName of startNames) {
+            Apify.utils.log.info(`startName: ${startName}`);
+            if (startName){
+              const {requestsFromUrl} = startName;
+              Apify.utils.log.info(`requestsFromUrl: ${requestsFromUrl}`);
+              if (requestsFromUrl){
+                  const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
+                  let lines = body.split('\n');
+                  delete  lines[0]
+                  lines.map(line => {
+                      let [id, name] = line.trim().split('\t');
+                      if (!name) { return false }
+                      Apify.utils.log.info(`csv extraction: id: ${id} name ${name}`);
+                      localInput = {
+                        ...input,
+                        search: name
+                      }
+                      urls = await searchUrls(localInput, proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined);
+                      requestListSources = urls.map((url) => ({
+                          url,
+                          userData: {
+                              id,
+                              pageType: getPageTypeFromUrl(url),
+                          },
+                      }));
                   }).filter(req => !!req);
               }
             }

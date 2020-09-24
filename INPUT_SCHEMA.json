@@ -36,6 +36,13 @@
             "prefill": [{ "url": "https://apify.com" }],
             "editor": "requestListSources"
         },
+        "startNames": {
+            "title": "csv list of profile names",
+            "type": "array",
+            "description": "csv list of instagram accounts where the actor will start crawling.",
+            "prefill": [{ "url": "https://apify.com" }],
+            "editor": "requestListSources"
+        },
         "directUrls": {
             "title": "Direct Instagram page URLs",
             "type": "array",
