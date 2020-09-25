@@ -102,6 +102,7 @@ const formatProfileOutput = async (input, request, data, page, itemSpec) => {
         id: data.id,
         _inputId: request.userData.id,
         _inputName: request.userData.name,
+        _inputCity: request.userData.city,
         _inputUrl: request.url,
         username: data.username,
         fullName: data.full_name,

@@ -113,14 +113,14 @@ async function main() {
                   let lines = body.split('\n');
                   delete  lines[0]
                   const linesExtracted = lines.map(line => {
-                      let [id, name] = line.trim().split('\t');
+                      let [id, name, city] = line.trim().split('\t');
                       if (!name) { return false }
-                      Apify.utils.log.info(`csv extraction: id: ${id} name ${name}`);
+                      Apify.utils.log.info(`csv extraction: id: ${id} name ${name} city: ${city}`);
                       return [id, name];
                   }).filter(req => !!req);
                   proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
                   for (var i = 0; i < linesExtracted.length; i++) {
-                      [id, name] = linesExtracted[i]
+                      [id, name, city] = linesExtracted[i]
                       input.search = name
                       urls = await searchUrls(input, proxyUrl);
                       Apify.utils.log.info(`urls: ${urls}`);
@@ -130,6 +130,7 @@ async function main() {
                               userData: {
                                   id,
                                   name,
+                                  city,
                                   pageType: getPageTypeFromUrl(url),
                               },
                           }
@@ -254,6 +255,7 @@ async function main() {
             const output = {
               _inputId: request.userData.id,
               _inputName: request.userData.name,
+              _inputCity: request.userData.city,
               _inputUrl: request.url,
               error: '404 page does not exist'
             }
