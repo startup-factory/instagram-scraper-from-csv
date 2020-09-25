@@ -129,6 +129,7 @@ async function main() {
                               url,
                               userData: {
                                   id,
+                                  name,
                                   pageType: getPageTypeFromUrl(url),
                               },
                           }
@@ -251,8 +252,9 @@ async function main() {
         if (response.status() === 404) {
             Apify.utils.log.error(`Page "${request.url}" does not exist.`);
             const output = {
-              inputId: request.userData.id,
-              inputUrl: request.url,
+              _inputId: request.userData.id,
+              _inputName: request.userData.name,
+              _inputUrl: request.url,
               error: '404 page does not exist'
             }
             await Apify.pushData(output);

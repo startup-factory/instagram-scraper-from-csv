@@ -100,8 +100,9 @@ const formatProfileOutput = async (input, request, data, page, itemSpec) => {
     return {
         '#debug': Apify.utils.createRequestDebugInfo(request),
         id: data.id,
-        inputId: request.userData.id,
-        inputUrl: request.url,
+        _inputId: request.userData.id,
+        _inputName: request.userData.name,
+        _inputUrl: request.url,
         username: data.username,
         fullName: data.full_name,
         biography: data.biography,
