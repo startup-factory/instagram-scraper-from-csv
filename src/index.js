@@ -113,14 +113,14 @@ async function main() {
                   let lines = body.split('\n');
                   delete  lines[0]
                   const linesExtracted = lines.map(line => {
-                      let [id, name, city] = line.trim().split('\t');
+                      let [id, name, city, googleUrl, bookingUrl, tripadvisorUrl] = line.trim().split('\t');
                       if (!name) { return false }
                       Apify.utils.log.info(`csv extraction: id: ${id} name ${name} city: ${city}`);
-                      return [id, name, city];
+                      return [id, name, city, googleUrl, bookingUrl, tripadvisorUrl];
                   }).filter(req => !!req);
                   proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
                   for (var i = 0; i < linesExtracted.length; i++) {
-                      [id, name, city] = linesExtracted[i]
+                      [id, name, city, googleUrl, bookingUrl, tripadvisorUrl] = linesExtracted[i]
                       input.search = name
                       urls = await searchUrls(input, proxyUrl);
                       Apify.utils.log.info(`urls: ${urls}`);
@@ -131,6 +131,9 @@ async function main() {
                                   id,
                                   name,
                                   city,
+                                  googleUrl,
+                                  bookingUrl,
+                                  tripadvisorUrl,
                                   pageType: getPageTypeFromUrl(url),
                               },
                           }
@@ -256,6 +259,9 @@ async function main() {
               _inputId: request.userData.id,
               _inputName: request.userData.name,
               _inputCity: request.userData.city,
+              _inputGoogleUrl: request.userData.googleUrl,
+              _inputBookingUrl: request.userData.bookingUrl,
+              _inputTripAdvisorUrl: request.userData.tripadvisorUrl,
               _inputUrl: request.url,
               error: '404 page does not exist'
             }
