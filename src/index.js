@@ -116,7 +116,7 @@ async function main() {
                       let [id, name, city] = line.trim().split('\t');
                       if (!name) { return false }
                       Apify.utils.log.info(`csv extraction: id: ${id} name ${name} city: ${city}`);
-                      return [id, name];
+                      return [id, name, city];
                   }).filter(req => !!req);
                   proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
                   for (var i = 0; i < linesExtracted.length; i++) {
