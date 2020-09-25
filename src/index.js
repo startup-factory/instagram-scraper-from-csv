@@ -13,6 +13,7 @@ const errors = require('./errors');
 
 async function main() {
     const input = await Apify.getInput();
+
     const {
         startUrls,
         startNames,
@@ -26,6 +27,7 @@ async function main() {
         loginCookies,
         directUrls = [],
     } = input;
+
 
     const extendOutputFunction = parseExtendOutputFunction(input.extendOutputFunction);
 
@@ -71,7 +73,7 @@ async function main() {
     }
 
     let urls;
-    let requestListSources;
+    let requestListSources = [];
     let proxyUrl;
     if (Array.isArray(directUrls) && directUrls.length > 0) {
         Apify.utils.log.warning('Search and StartUrls are disabled when Direct URLs are used');
@@ -110,26 +112,28 @@ async function main() {
                   const { body } = await Apify.utils.requestAsBrowser({ url: requestsFromUrl, encoding:'utf-8' });
                   let lines = body.split('\n');
                   delete  lines[0]
-                  lines.map(line => {
+                  const linesExtracted = lines.map(line => {
                       let [id, name] = line.trim().split('\t');
                       if (!name) { return false }
                       Apify.utils.log.info(`csv extraction: id: ${id} name ${name}`);
-                      let localInput = {
-                        ...input,
-                        search: name
-                      };
-                      proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
-                      urls = searchUrls(localInput, proxyUrl);
-                      urls.map((url) => (
-                          requestListSources.push({
+                      return [id, name];
+                  }).filter(req => !!req);
+                  proxyUrl = proxy ? Apify.getApifyProxyUrl({ groups: proxy.apifyProxyGroups, session: proxySession }) : undefined;
+                  for (var i = 0; i < linesExtracted.length; i++) {
+                      [id, name] = linesExtracted[i]
+                      input.search = name
+                      urls = await searchUrls(input, proxyUrl);
+                      Apify.utils.log.info(`urls: ${urls}`);
+                      requestListSources = requestListSources.concat(urls.map((url) => {
+                          return {
                               url,
                               userData: {
                                   id,
                                   pageType: getPageTypeFromUrl(url),
                               },
-                          })
-                      ));
-                  }).filter(req => !!req);
+                          }
+                      }));
+                  }
               }
             }
         }
