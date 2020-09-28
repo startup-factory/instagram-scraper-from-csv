@@ -32,43 +32,40 @@ const searchUrls = async (input, proxy, isRetry = false) => {
     Apify.utils.log.info(`Searching for "${search}"`);
 
     const searchUrl = `https://www.instagram.com/web/search/topsearch/?context=${searchType}&query=${encodeURIComponent(search)}`;
-    let response;
-    try {
-       response = await request({
-          url: searchUrl,
-          json: true,
-          proxy,
-      });
-    } catch (e) {
+    request({
+        url: searchUrl,
+        json: true,
+        proxy,
+    }).then((response) =>{
+      Apify.utils.log.debug('Response', { response });
+
+      if (typeof response !== 'object') {
+          if (process.env.APIFY_LOG_LEVEL === 'DEBUG') {
+              await Apify.setValue(`RESPONSE-${Math.random()}`, response, { contentType: 'text/plain' });
+          }
+
+          if (!isRetry) {
+              Apify.utils.log.warning('Server returned non-json answer, retrying one more time');
+              return searchUrls(input, proxy, true);
+          }
+
+          throw new Error('Search is blocked on current proxy IP');
+      }
+
+      let urls;
+      if (searchType === SEARCH_TYPES.USER) urls = response.users.map(formatUserResult);
+      else if (searchType === SEARCH_TYPES.PLACE) urls = response.places.map(formatPlaceResult);
+      else if (searchType === SEARCH_TYPES.HASHTAG) urls = response.hashtags.map(formatHashtagResult);
+
+      Apify.utils.log.info(`Found ${urls.length} search results. Limiting to ${searchLimit}.`);
+      urls = urls.slice(0, searchLimit);
+
+      return urls;
+    })
+    .catch((e) => {
       Apify.utils.log.error(e)
       return []
-    }
-
-
-    Apify.utils.log.debug('Response', { response });
-
-    if (typeof response !== 'object') {
-        if (process.env.APIFY_LOG_LEVEL === 'DEBUG') {
-            await Apify.setValue(`RESPONSE-${Math.random()}`, response, { contentType: 'text/plain' });
-        }
-
-        if (!isRetry) {
-            Apify.utils.log.warning('Server returned non-json answer, retrying one more time');
-            return searchUrls(input, proxy, true);
-        }
-
-        throw new Error('Search is blocked on current proxy IP');
-    }
-
-    let urls;
-    if (searchType === SEARCH_TYPES.USER) urls = response.users.map(formatUserResult);
-    else if (searchType === SEARCH_TYPES.PLACE) urls = response.places.map(formatPlaceResult);
-    else if (searchType === SEARCH_TYPES.HASHTAG) urls = response.hashtags.map(formatHashtagResult);
-
-    Apify.utils.log.info(`Found ${urls.length} search results. Limiting to ${searchLimit}.`);
-    urls = urls.slice(0, searchLimit);
-
-    return urls;
+    })
 };
 
 module.exports = {
