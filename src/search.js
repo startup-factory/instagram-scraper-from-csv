@@ -32,13 +32,14 @@ const searchUrls = async (input, proxy, isRetry = false) => {
     Apify.utils.log.info(`Searching for "${search}"`);
 
     const searchUrl = `https://www.instagram.com/web/search/topsearch/?context=${searchType}&query=${encodeURIComponent(search)}`;
+    const response;
     try {
-      const response = await request({
+       response = await request({
           url: searchUrl,
           json: true,
           proxy,
       });
-    }catch (e) {
+    } catch (e) {
       Apify.utils.log.error(e)
       return []
     }
