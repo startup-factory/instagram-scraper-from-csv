@@ -32,11 +32,18 @@ const searchUrls = async (input, proxy, isRetry = false) => {
     Apify.utils.log.info(`Searching for "${search}"`);
 
     const searchUrl = `https://www.instagram.com/web/search/topsearch/?context=${searchType}&query=${encodeURIComponent(search)}`;
-    const response = await request({
-        url: searchUrl,
-        json: true,
-        proxy,
-    });
+    const searchUrl = `https://www.instagram.com/web/search/topsearch/?context=user&query=Riad%20Etoile%20D'essaouira`;
+    try {
+      const response = await request({
+          url: searchUrl,
+          json: true,
+          proxy,
+      });
+    }catch (e) {
+      Apify.utils.log.error(e)
+      return []
+    }
+
 
     Apify.utils.log.debug('Response', { response });
 

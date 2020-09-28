@@ -124,20 +124,34 @@ async function main() {
                       input.search = name
                       urls = await searchUrls(input, proxyUrl);
                       Apify.utils.log.info(`urls: ${urls}`);
-                      requestListSources = requestListSources.concat(urls.map((url) => {
-                          return {
-                              url,
-                              userData: {
-                                  id,
-                                  name,
-                                  city,
-                                  googleUrl,
-                                  bookingUrl,
-                                  tripadvisorUrl,
-                                  pageType: getPageTypeFromUrl(url),
-                              },
+                      if (!!urls.length) {
+                          requestListSources = requestListSources.concat(urls.map((url) => {
+                              return {
+                                  url,
+                                  userData: {
+                                      id,
+                                      name,
+                                      city,
+                                      googleUrl,
+                                      bookingUrl,
+                                      tripadvisorUrl,
+                                      pageType: getPageTypeFromUrl(url),
+                                  },
+                              }
+                          }));
+                      } else {
+                          const output = {
+                            _inputId: id,
+                            _inputName: name,
+                            _inputCity: city,
+                            _inputGoogleUrl: googleUrl,
+                            _inputBookingUrl: bookingUrl,
+                            _inputTripAdvisorUrl: tripadvisorUrl,
+                            _inputUrl: request.url,
+                            error: 'user name search returns error'
                           }
-                      }));
+                          await Apify.pushData(output);
+                      }
                   }
               }
             }
