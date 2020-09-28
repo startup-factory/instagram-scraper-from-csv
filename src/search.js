@@ -41,7 +41,7 @@ const searchUrls = async (input, proxy, isRetry = false) => {
 
       if (typeof response !== 'object') {
           if (process.env.APIFY_LOG_LEVEL === 'DEBUG') {
-              await Apify.setValue(`RESPONSE-${Math.random()}`, response, { contentType: 'text/plain' });
+              Apify.setValue(`RESPONSE-${Math.random()}`, response, { contentType: 'text/plain' });
           }
 
           if (!isRetry) {
