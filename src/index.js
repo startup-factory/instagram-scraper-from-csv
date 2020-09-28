@@ -13,6 +13,30 @@ const errors = require('./errors');
 
 async function main() {
     const input = await Apify.getInput();
+//     let input = {
+//   "searchType": "user",
+//   "searchLimit": 1,
+//   "startNames": [
+//     {
+//       "requestsFromUrl": "https://apify-uploads-prod.s3.amazonaws.com/AXA4NGECRRb4wzPaT-Insta_16-132_-_1-25.tsv"
+//     }
+//   ],
+//   "resultsType": "details",
+//   "resultsLimit": 1,
+//   "maxRequestRetries": 2,
+//   "proxy": {
+//     "useApifyProxy": false,
+//     "apifyProxyGroups": [
+//       "RESIDENTIAL"
+//     ]
+//   },
+//   "expandOwners": false,
+//   "extendOutputFunction": "($) => { return {} }",
+//   "scrollWaitSecs": 15,
+//   "likedByLimit": 0,
+//   "followingLimit": 0,
+//   "followedByLimit": 0
+// }
 
     const {
         startUrls,
@@ -147,8 +171,8 @@ async function main() {
                             _inputGoogleUrl: googleUrl,
                             _inputBookingUrl: bookingUrl,
                             _inputTripAdvisorUrl: tripadvisorUrl,
-                            _inputUrl: request.url,
-                            error: 'user name search returns error'
+                            _inputUrl: null,
+                            error: 'user name search found 0 results'
                           }
                           await Apify.pushData(output);
                       }
